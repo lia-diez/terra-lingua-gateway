@@ -8,7 +8,9 @@ cat <<EOF > appsettings.json
       "Microsoft.AspNetCore": "${MS_LOG_LEVEL:-Warning}"
     }
   },
-  "ApiKey": "${API_KEY}",
+  "ApiKey": {
+      "validSeconds": "${API_KEY_VALID_SECONDS}"
+    },
   "LlmService": {
     "url": "${LLM_URL}"
   },
