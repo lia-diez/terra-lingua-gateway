@@ -9,13 +9,13 @@ public class ApiKeyMiddleware
     private readonly RequestDelegate _next;
     private const string ApiKeyHeaderName = "X-API-KEY";
     private readonly ILogger<ApiKeyService> _logger;
-    private readonly TokenService _tokenService;
+    private readonly ApiKeyService _apiKeyService;
 
-    public ApiKeyMiddleware(RequestDelegate next, ILogger<ApiKeyService> logger, TokenService tokenService)
+    public ApiKeyMiddleware(RequestDelegate next, ILogger<ApiKeyService> logger, ApiKeyService apiKeyService)
     {
         _next = next;
         _logger = logger;
-        _tokenService = tokenService;
+        _apiKeyService = apiKeyService;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -35,14 +35,13 @@ public class ApiKeyMiddleware
             return;
         }
 
-        var userId = await _tokenService.ValidateTokenAsync(extractedApiKey.ToString());
-        if (userId == null)
+        var isValid = await _apiKeyService.IsValidApiKey(extractedApiKey);
+        if (!isValid)
         {
             context.Response.StatusCode = 403;
             await context.Response.WriteAsync("Unauthorized client.");
             return;
         }
-        context.Items["UserId"] = userId;
 
         await _next(context);
     }
